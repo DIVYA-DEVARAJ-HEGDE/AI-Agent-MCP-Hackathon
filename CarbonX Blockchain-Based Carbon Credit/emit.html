@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emitter Dashboard — Carbon Credit Network</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #0e1117, #1a1f27);
+  background-image: url("flow.jpg");
+  color: #fff;
+}
+
+header {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  padding: 22px;
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #333;
+}
+
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: rgba(255,255,255,0.05);
+  padding: 35px;
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0px 0px 30px rgba(0,255,150,0.1);
+}
+
+h2 {
+  font-size: 24px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.input-box {
+  margin-bottom: 18px;
+}
+
+.input-box label {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.input-box input,
+.input-box select {
+  width: 100%;
+  padding: 14px;
+  background: #11151b;
+  border: 1px solid #2c2f36;
+  color: #80ffea;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+button {
+  background: linear-gradient(90deg, #00d47e, #00ffa6);
+  padding: 15px 28px;
+  border: none;
+  border-radius: 12px;
+  font-size: 17px;
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 20px;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(0,255,150,0.4);
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: scale(1.02);
+}
+
+.report-box {
+  background: #10141a;
+  padding: 20px;
+  margin-top: 25px;
+  border-radius: 12px;
+  border-left: 4px solid #00d47e;
+  display: none;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.success-animation {
+  display: none;
+  text-align: center;
+  margin-top: 25px;
+}
+
+.success-animation img {
+  width: 120px;
+  filter: drop-shadow(0 0 8px #00ffa6);
+}
+</style>
+
+</head>
+<body>
+
+<header>🌿 Emitter Organization Dashboard</header>
+
+<div class="container">
+
+  <h2>Enter Annual Emission Report</h2>
+
+  <div class="input-box">
+    <label>Organization Name</label>
+    <input type="text" id="orgName" placeholder="Ex: GreenTech Industries Pvt Ltd">
+  </div>
+
+  <div class="input-box">
+    <label>Reporting Year</label>
+    <input type="text" id="year" placeholder="Ex: 2023-24">
+  </div>
+
+  <div class="input-box">
+    <label>Total CO₂ Emissions (tCO₂e)</label>
+    <input type="number" id="emissions" placeholder="Ex: 1250">
+  </div>
+
+  <div class="input-box">
+    <label>Sector</label>
+    <select id="sector">
+      <option value="" disabled selected>Select Sector</option>
+      <option>Energy</option>
+      <option>Manufacturing</option>
+      <option>Transportation</option>
+      <option>Construction</option>
+      <option>IT & Data Centers</option>
+      <option>Other Industries</option>
+    </select>
+  </div>
+
+  <button onclick="startSignatureProcess()">Generate Report (MetaMask Sign)</button>
+
+  <div class="success-animation" id="successAnimation">
+    <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png">
+    <p style="font-size:18px;margin-top:10px;color:#00ffa6;font-weight:600;">
+      Report Verified & Signed ✔
+    </p>
+  </div>
+
+  <div class="report-box" id="reportBox">
+    <h3>Generated Report</h3>
+    <p id="reportData"></p>
+  </div>
+
+</div>
+
+<script>
+// STEP 1: Trigger MetaMask Signature Request
+async function startSignatureProcess() {
+  let org = document.getElementById("orgName").value;
+  let year = document.getElementById("year").value;
+  let emissions = document.getElementById("emissions").value;
+  let sector = document.getElementById("sector").value;
+
+  if (!org || !year || !emissions || !sector) {
+    alert("Please fill all fields.");
+    return;
+  }
+
+  if (typeof window.ethereum === 'undefined') {
+    alert("MetaMask not detected. Please install MetaMask.");
+    return;
+  }
+
+  // Request wallet connection
+  const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+  const user = accounts[0];
+
+  const message = `
+  Carbon Credit Network — Emission Report Verification
+
+  Organization: ${org}
+  Year: ${year}
+  Emissions: ${emissions} tCO₂e
+  Sector: ${sector}
+
+  Please sign to verify the authenticity of your report.
+  `;
+
+  try {
+    // MetaMask opens signature popup
+    const signature = await ethereum.request({
+      method: "personal_sign",
+      params: [message, user]
+    });
+
+    console.log("Signature:", signature);
+
+    generateReport(org, year, emissions, sector, signature);
+
+  } catch (error) {
+    alert("Signature rejected.");
+  }
+}
+
+
+// STEP 2: Show Successful Signed Report
+function generateReport(org, year, emissions, sector, signature) {
+
+  let report = `
+    📌 Organization: ${org}
+    📌 Reporting Year: ${year}
+    📌 Total Emissions: ${emissions} tCO₂e
+    📌 Sector: ${sector}
+
+    🔏 MetaMask Signature (Proof):
+    ${signature}
+
+    🎉 Report verified & signed using blockchain wallet!
+  `;
+
+  document.getElementById("reportData").innerText = report;
+  document.getElementById("reportBox").style.display = "block";
+
+  document.getElementById("successAnimation").style.display = "block";
+}
+</script>
+
+</body>
+</html>

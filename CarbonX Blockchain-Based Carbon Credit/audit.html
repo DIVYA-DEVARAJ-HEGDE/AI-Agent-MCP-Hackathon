@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Auditor Dashboard — Web3 Connected</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg,#020617,#0f172a,#000);
+  color: #e2e8f0;
+}
+
+/* Floating glow */
+@keyframes glow {
+  0% { box-shadow: 0 0 20px #0ea5e955; }
+  50% { box-shadow: 0 0 50px #38bdf888; }
+  100% { box-shadow: 0 0 20px #0ea5e955; }
+}
+
+.container {
+  max-width: 1300px;
+  margin: auto;
+  padding: 40px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.logo-box {
+  width: 70px; height: 70px;
+  background: linear-gradient(135deg,#3b82f6,#06b6d4);
+  border-radius: 20px;
+  display: flex; justify-content: center; align-items: center;
+  color: black;
+  font-weight: 700;
+  font-size: 20px;
+  animation: glow 3s infinite ease-in-out;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg,#38bdf8,#06b6d4);
+  color: #000;
+  padding: 14px 22px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.25s;
+}
+.primary-btn:hover { transform: scale(1.07); }
+
+/* Popup */
+.popup-bg {
+  position: fixed; top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.8);
+  display:none;
+  justify-content:center; align-items:center;
+  backdrop-filter: blur(10px);
+  z-index: 999;
+}
+.popup-card {
+  width: 400px;
+  background: rgba(30,41,59,0.9);
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 0 40px #00eaff99;
+  animation: popIn 0.5s ease;
+}
+@keyframes popIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Cards */
+.card {
+  background: rgba(30,41,59,0.45);
+  border: 1px solid rgba(148,163,184,0.2);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+  backdrop-filter: blur(14px);
+}
+.section-title {
+  font-size: 22px; font-weight: 700;
+  display: flex; align-items: center; gap: 10px;
+}
+.org-box {
+  background: rgba(15,23,42,0.65);
+  border:1px solid #475569;
+  padding: 18px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+}
+
+/* Inputs */
+input, select, textarea {
+  width: 100%;
+  background: rgba(15,23,42,0.75);
+  border: 1px solid #475569;
+  padding: 12px;
+  border-radius: 10px;
+  color: #e2e8f0;
+  font-size: 15px;
+  margin-top: 6px;
+}
+
+.submit-btn {
+  background: #22c55e;
+  padding: 12px;
+  border:none;
+  width:100%;
+  border-radius:10px;
+  margin-top:14px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.verify-btn {
+  background: #0ea5e9;
+  padding: 10px;
+  border-radius: 10px;
+  width: 120px;
+  margin-top: 8px;
+  cursor:pointer;
+  color:black;
+  font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<!-- POPUP -->
+<div class="popup-bg" id="walletPopup">
+  <div class="popup-card">
+    <h2 style="color:#38bdf8;">🔐 MetaMask Authentication</h2>
+    <p style="color:#94a3b8;">Sign to continue</p>
+
+    <button class="primary-btn" style="width:100%; justify-content:center;" onclick="connectMetaMask()">
+      <i data-lucide="wallet"></i> Connect & Sign
+    </button>
+
+    <p id="walletStatus" style="margin-top:15px;font-size:14px;color:#a5f3fc;"></p>
+
+    <button onclick="closeWalletPopup()" style="margin-top:10px;background:none;border:none;color:#38bdf8;cursor:pointer;">
+      Close
+    </button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div style="display:flex; gap:16px; align-items:center;">
+      <div class="logo-box">AUD</div>
+      <div>
+        <h1 style="margin:0;">Auditor Dashboard</h1>
+        <p style="margin:0; color:#94a3b8;font-size:14px;">Verify & Submit Data on Blockchain</p>
+      </div>
+    </div>
+    <button class="primary-btn" onclick="openWalletPopup()">
+      <i data-lucide="wallet"></i> Connect Wallet
+    </button>
+  </div>
+
+  <!-- Assigned Orgs -->
+  <div class="card">
+    <div class="section-title"><i data-lucide="factory"></i> Assigned Organizations</div>
+
+    <div class="org-box"><b>GreenSteel Pvt Ltd</b><br>Steel Manufacturing</div>
+    <div class="org-box"><b>EcoCement India</b><br>Cement Production</div>
+  </div>
+
+  <!-- Measurement Submission -->
+  <div class="card">
+    <div class="section-title"><i data-lucide="pencil"></i> Submit CO₂ Measurement</div>
+
+    <label>Organization</label>
+    <select id="org">
+      <option>Select Organization</option>
+      <option>GreenSteel Pvt Ltd</option>
+      <option>EcoCement India</option>
+    </select>
+
+    <label>Scope 1 Emissions</label>
+    <input id="s1" type="number">
+
+    <label>Scope 2 Emissions</label>
+    <input id="s2" type="number">
+
+    <label>Notes</label>
+    <textarea id="notes" rows="3"></textarea>
+
+    <button class="submit-btn" onclick="submitToBlockchain()">Submit to Blockchain</button>
+
+    <p id="txStatus" style="color:#38bdf8;font-size:14px;margin-top:10px;"></p>
+  </div>
+
+  <!-- Verify Claims -->
+  <div class="card">
+    <div class="section-title"><i data-lucide="shield-check"></i> Verify Emission Reduction Claims</div>
+
+    <div class="org-box">
+      <b>HydroClean Industries</b><br>
+      Claim: 38%
+      <button class="verify-btn" onclick="verifyClaim('HydroClean Industries')">Verify</button>
+    </div>
+
+    <div class="org-box">
+      <b>UrbanEco Plastics</b><br>
+      Claim: 22%
+      <button class="verify-btn" onclick="verifyClaim('UrbanEco Plastics')">Verify</button>
+    </div>
+
+    <p id="claimStatus" style="color:#22c55e;margin-top:10px;"></p>
+  </div>
+
+</div>
+
+<script>
+lucide.createIcons();
+
+/* Global */
+let provider, signer, contract;
+
+/* Contract */
+const CONTRACT_ADDRESS = "0xe2899bddFD890e320e643044c6b95B9B0b84157A";
+
+const ABI = [
+  "function submitAudit(string org,uint256 s1,uint256 s2,string notes) public",
+  "function verifyClaim(string org) public view returns (bool)"
+];
+
+/* Popup */
+function openWalletPopup(){ document.getElementById("walletPopup").style.display="flex"; }
+function closeWalletPopup(){ document.getElementById("walletPopup").style.display="none"; }
+
+/* Connect Wallet */
+async function connectMetaMask(){
+  if (!window.ethereum) return alert("Install MetaMask");
+
+  provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+
+  signer = provider.getSigner();
+  const address = await signer.getAddress();
+
+  await signer.signMessage("Auditor Identity Verification");
+
+  document.getElementById("walletStatus").innerHTML =
+    `Wallet: ${address.substring(0,6)}...${address.slice(-4)}<br>Signed Successfully`;
+
+  contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+  setTimeout(() => { closeWalletPopup(); }, 800);
+}
+
+
+async function submitToBlockchain(){
+  if (!contract) return alert("Connect MetaMask first");
+
+  const org = document.getElementById("org").value;
+  const s1 = document.getElementById("s1").value;
+  const s2 = document.getElementById("s2").value;
+  const notes = document.getElementById("notes").value;
+
+  const tx = await contract.submitAudit(org, s1, s2, notes);
+  document.getElementById("txStatus").innerHTML = `⏳ Pending: ${tx.hash}`;
+
+  await tx.wait();
+  document.getElementById("txStatus").innerHTML = `✅ Success: ${tx.hash}`;
+}
+
+
+async function verifyClaim(orgName){
+  if (!signer) return alert("Connect MetaMask First!");
+
+  
+  await signer.signMessage(`Verify claim for ${orgName}`);
+
+  const result = await contract.verifyClaim(orgName);
+
+  document.getElementById("claimStatus").innerHTML =
+    result
+      ? `✔ Claim VERIFIED for ${orgName}`
+      : `❌ Claim NOT Valid`;
+}
+</script>
+
+</body>
+</html>

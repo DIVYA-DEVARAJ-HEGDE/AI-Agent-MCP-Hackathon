@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futuristic NFT Portal</title>
+
+<style>
+body {
+  margin:0; height:100vh; background: radial-gradient(circle,#0a0f1c,#000);background-image: url("green.jpg");
+  font-family: 'Orbitron', sans-serif; overflow:hidden; display:flex; justify-content:center; align-items:center; color:#fff;
+}
+
+
+.particle {
+  position:absolute; width:6px; height:6px; border-radius:50%;
+  background:#0ff; opacity:0.6;
+  animation: float 6s infinite;
+}
+@keyframes float {0%{transform:translateY(0) translateX(0);}50%{transform:translateY(-60px) translateX(20px);}100%{transform:translateY(0) translateX(-20px);}}
+
+
+#connect-btn {
+  padding:18px 50px; font-size:22px; font-weight:bold;
+  background: linear-gradient(45deg,#0ff,#00f); border:none; border-radius:16px;
+  cursor:pointer; box-shadow:0 0 25px #0ff, 0 0 50px #00f; transition:0.3s;
+}
+#connect-btn:hover { transform:scale(1.1); box-shadow:0 0 50px #0ff,0 0 80px #00f; }
+
+.popup-bg {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; backdrop-filter:blur(6px);
+}
+.popup-card {
+  background:rgba(0,255,255,0.08); padding:40px; border-radius:24px; text-align:center;
+  box-shadow:0 0 40px #0ff; backdrop-filter:blur(20px); animation: popIn 0.6s ease; position:relative;
+}
+@keyframes popIn { from{transform:scale(0.6);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+#scanner {
+  position:relative; margin:20px auto; width:200px; height:200px; border-radius:50%;
+  border:2px solid #0ff; overflow:hidden; box-shadow:0 0 20px #0ff inset;
+}
+#scanner .beam {
+  position:absolute; top:0; left:-100%; width:100%; height:100%;
+  background: linear-gradient(90deg,transparent,#0ff,transparent);
+  animation: scan 2s infinite;
+}
+@keyframes scan {0%{left:-100%;}50%{left:100%;}100%{left:-100%;}}
+
+
+#wallet-info { margin-top:20px; font-size:15px; text-shadow:0 0 10px #0ff; }
+
+.wallet-btn, .close-btn {
+  padding:14px 0; width:100%; margin-top:20px; border:none; border-radius:12px; font-size:18px; cursor:pointer;
+}
+.wallet-btn { background: linear-gradient(45deg,#0ff,#00f); font-weight:bold; transition:0.3s;}
+.wallet-btn:hover { transform:scale(1.05); box-shadow:0 0 30px #0ff; }
+.close-btn { background:none; color:#0ff; text-decoration:underline; font-weight:bold; }
+
+
+#portal {
+  position:absolute; top:50%; left:50%; width:0; height:0;
+  background: rgba(0,255,255,0.15); border-radius:50%;
+  transform: translate(-50%,-50%); z-index:10;
+  transition: width 1.5s ease, height 1.5s ease, opacity 1.5s ease;
+}
+</style>
+</head>
+<body>
+
+<div id="particle-container"></div>
+
+<button id="connect-btn" onclick="openPopup()">CONNECT WALLET</button>
+
+<div class="popup-bg" id="popup">
+  <div class="popup-card">
+    <h2 style="color:#0ff;">🔐 NFT Access Portal</h2>
+    <p>Connect your wallet to verify NFT ownership</p>
+
+    <div id="scanner"><div class="beam"></div></div>
+
+    <button class="wallet-btn" onclick="connectMetaMask()">Connect MetaMask</button>
+    <div id="wallet-info"></div>
+    <p class="close-btn" onclick="closePopup()">✖ Close</p>
+  </div>
+</div>
+
+<div id="portal"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+<script>
+// Plasma Particles
+const container=document.getElementById("particle-container");
+for(let i=0;i<40;i++){
+  const p=document.createElement("div");
+  p.classList.add("particle");
+  p.style.top=Math.random()*100+'%';
+  p.style.left=Math.random()*100+'%';
+  p.style.width=p.style.height=4+Math.random()*6+'px';
+  p.style.animationDuration=4+Math.random()*6+'s';
+  container.appendChild(p);
+}
+
+function openPopup(){document.getElementById("popup").style.display="flex";}
+function closePopup(){document.getElementById("popup").style.display="none";}
+
+
+const NFT_CONTRACT="0x7e4fd68d1ce347d536d7d249529d6dee17283255"; 
+const REQUIRED_TOKEN_ID = 1;
+
+
+async function connectMetaMask() {
+  if (!window.ethereum) {
+    alert("MetaMask not installed!"); 
+    return;
+  }
+
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+  
+  await provider.send("eth_requestAccounts", []);
+  const signer = provider.getSigner();
+  const address = await signer.getAddress();
+
+  
+  const message = `
+  NFT Access Portal Verification
+  ---------------------------------
+  Wallet: ${address}
+  Purpose: Verify identity & unlock NFT portal
+  Time: ${new Date().toLocaleString()}
+  `;
+
+  try {
+    const signature = await ethereum.request({
+      method: "personal_sign",
+      params: [message, address]
+    });
+
+    console.log("User Signature:", signature);
+  } 
+  catch (err) {
+    alert("❌ Signature rejected. Access denied.");
+    return;
+  }
+
+  
+  const balance = await provider.getBalance(address);
+  const ethBal = ethers.utils.formatEther(balance);
+  document.getElementById("wallet-info").innerHTML = 
+    `<b>Wallet:</b> ${address.substring(0,8)}...${address.slice(-6)}
+     <br><b>Balance:</b> ${ethBal} ETH
+     <br><b>Signature:</b> Verified ✔`;
+
+  
+  verifyNFT(provider, address);
+}
+
+
+async function verifyNFT(provider, address) {
+  const scanner = document.getElementById("scanner");
+  const portal = document.getElementById("portal");
+
+  try {
+    const abi = ["function ownerOf(uint256 tokenId) view returns (address)"];
+    const nft = new ethers.Contract(NFT_CONTRACT, abi, provider);
+
+    const owner = await nft.ownerOf(REQUIRED_TOKEN_ID);
+
+    if (owner.toLowerCase() === address.toLowerCase()) {
+      
+      scanner.style.borderColor="#0f0";
+      scanner.style.boxShadow="0 0 50px #0f0 inset";
+
+      portal.style.width="500px";
+      portal.style.height="500px";
+      portal.style.opacity="1";
+
+      setTimeout(() => {
+        window.location.href="dashboard.html";
+      }, 1800);
+    } else {
+      
+      scanner.style.borderColor="#f00";
+      scanner.style.boxShadow="0 0 50px #f00 inset";
+      alert("NFT Not Found. Access Denied.");
+    }
+
+  } catch (err) {
+    alert("⚠ Error verifying NFT ownership.");
+    window.location.href = "land.html";
+  }
+}
+</script>
+</body>
+</html>

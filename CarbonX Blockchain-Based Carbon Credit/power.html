@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💱 Power Exchange Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{
+  --glass: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.12);
+  --text: #e7faff;
+  --accent: #00f2ff;
+  --accent2: #71ffd4;
+  --radius: 16px;
+  font-family: 'Inter', sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background: url('leaf.jpg') no-repeat center center fixed;
+    background-repeat: repeat;
+    background-size: 300px 300px;   
+    background-position: center;  
+
+}
+.wrap{padding:28px;max-width:1400px;margin:auto;}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px;}
+.brand{display:flex;gap:16px;align-items:center;}
+.logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#012;font-size:22px;font-weight:800;animation:glowPulse 3.8s infinite ease-in-out;}
+h1{margin:0;font-size:26px;font-weight:800;letter-spacing:0.5px;}
+.controls{display:flex;gap:12px;align-items:center;}
+.btn{padding:10px 16px;border-radius:12px;border:1px solid var(--border);background:var(--glass);cursor:pointer;font-weight:700;color:#eaffff;backdrop-filter:blur(10px);transition:0.2s;}
+.btn:hover{background:rgba(255,255,255,0.15);}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#00343c;border:none;animation:glowPulse 3s infinite ease-in-out;}
+.card{padding:20px;border-radius:var(--radius);background:rgba(0,0,0,0.4);border:1px solid var(--border);backdrop-filter:blur(12px);box-shadow:0 0 30px rgba(0,255,255,0.05);transition:0.3s;margin-bottom:20px;}
+.card:hover{box-shadow:0 0 35px rgba(0,255,255,0.10);}
+label{font-size:14px;margin-bottom:6px;display:block;color:rgba(230,255,255,0.8);}
+input,select,textarea{width:100%;padding:12px;border-radius:10px;margin-top:6px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text);}
+.list{max-height:240px;overflow:auto;margin-top:14px;padding-right:6px;}
+.list-item{padding:14px;border-radius:14px;margin-bottom:10px;background:linear-gradient(180deg,rgba(255,255,255,0.05),rgba(0,0,0,0.01));border:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;transition:0.25s;}
+.list-item:hover{background:rgba(255,255,255,0.1);}
+.mono{font-family:monospace;}
+.small{font-size:13px;color:rgba(220,240,255,0.7);}
+.tx-log{max-height:180px;overflow:auto;margin-top:12px;}
+.tx-item{background:rgba(0,0,0,0.35);padding:10px;border-radius:10px;margin-bottom:10px;font-size:13px;color:#c7faff;border-left:3px solid var(--accent);animation:fadeIn 0.4s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.mini-charts{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-top:20px;justify-content:center;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.toast{position:fixed;top:20px;right:20px;padding:12px 20px;background:#00f2ff;color:#00343c;font-weight:700;border-radius:12px;box-shadow:0 0 20px rgba(0,242,255,0.5);opacity:0;transition:0.4s;}
+.toast.show{opacity:1;}
+@keyframes glowPulse{0%{box-shadow:0 0 0px var(--accent);}50%{box-shadow:0 0 18px var(--accent);}100%{box-shadow:0 0 0px var(--accent);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">
+    <div class="logo">💱</div>
+    <div>
+      <h1>Carbon Credit Power Exchange</h1>
+      <div class="small">Buy/Sell CCT • Double Auction • Real-time Market</div>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="small">Wallet: <span id="wallet">Not connected</span></div>
+    <button id="connectBtn" class="btn primary">Connect Wallet</button>
+  </div>
+</header>
+
+<main style="display:grid;grid-template-columns:2fr 1fr;gap:24px;">
+
+<section>
+  <!-- Buy/Sell Window -->
+  <div class="card">
+    <h3>Place Order</h3>
+    <div class="grid-2" style="margin-top:10px">
+      <div>
+        <label>Order Type</label>
+        <select id="orderType"><option>Buy</option><option>Sell</option></select>
+      </div>
+      <div>
+        <label>Amount (CCT)</label>
+        <input type="number" id="orderAmount" placeholder="1000">
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <label>Price per CCT (ETH)</label>
+      <input type="number" id="orderPrice" placeholder="0.01">
+    </div>
+    <div style="margin-top:12px;display:flex;gap:12px">
+      <button id="placeOrder" class="btn primary">Submit Order</button>
+      <button id="simulateOrder" class="btn">Simulate</button>
+    </div>
+  </div>
+
+  <!-- Market Info -->
+
+  <div class="card">
+    <h3>Market Overview</h3>
+    <canvas id="marketChart" width="400" height="150"></canvas>
+  </div>
+
+  <!-- Transaction Log -->
+
+  <div class="card">
+    <h3>Transaction Log</h3>
+    <div id="txLog" class="tx-log"></div>
+  </div>
+</section>
+
+<aside>
+  <!-- Orders -->
+  <div class="card">
+    <h3>Open Orders</h3>
+    <div id="orderList" class="list"></div>
+  </div>
+</aside>
+
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script>
+lucide.createIcons();
+
+let web3;
+let walletAddress = null;
+let orders=[];
+
+function showToast(msg){
+  const toast=document.getElementById('toast');
+  toast.innerText=msg;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),3000);
+}
+
+// --- Connect Wallet ---
+document.getElementById('connectBtn').addEventListener('click', async ()=>{
+  if(window.ethereum){
+    web3=new Web3(window.ethereum);
+    const accounts=await window.ethereum.request({method:'eth_requestAccounts'});
+    walletAddress=accounts[0];
+    document.getElementById('wallet').innerText=walletAddress;
+    showToast('Wallet Connected!');
+  } else alert('MetaMask not found');
+});
+
+// --- Place Order with MetaMask Approval ---
+document.getElementById('placeOrder').addEventListener('click', async () => {
+  const type = document.getElementById('orderType').value;
+  const amount = parseFloat(document.getElementById('orderAmount').value);
+  const price = parseFloat(document.getElementById('orderPrice').value);
+
+  if(!walletAddress){ alert('Connect wallet first'); return; }
+  if(!amount || !price){ alert('Enter amount and price'); return; }
+
+  try {
+    // Demo on-chain transaction (replace 'to' with smart contract for live orders)
+    const tx = await web3.eth.sendTransaction({
+      from: walletAddress,
+      to: walletAddress,
+      value: web3.utils.toWei('0.001','ether')
+    });
+
+    const order = { 
+      id:'ORD-'+Math.random().toString(36).slice(2,6), 
+      type, 
+      amount, 
+      price, 
+      wallet: walletAddress, 
+      txHash: tx.transactionHash 
+    };
+    
+    orders.push(order);
+    renderOrders();
+    log(`✅ Order placed on-chain: ${type} ${amount} CCT @ ${price} ETH (tx: ${tx.transactionHash})`);
+    showToast('Order submitted & approved!');
+    updateMarketChart();
+
+  } catch(err) {
+    log(`❌ Transaction failed: ${err.message}`);
+    showToast('Transaction rejected or failed');
+  }
+});
+
+document.getElementById('simulateOrder').addEventListener('click',()=>{
+  document.getElementById('orderAmount').value=Math.floor(Math.random()*2000)+100;
+  document.getElementById('orderPrice').value=(Math.random()*0.02+0.005).toFixed(3);
+});
+
+// --- Render Orders ---
+const orderList=document.getElementById('orderList');
+function renderOrders(){
+  orderList.innerHTML='';
+  orders.forEach(o=>{
+    const el=document.createElement('div');
+    el.className='list-item';
+    el.innerHTML=`<div>${o.type} <strong>${o.amount} CCT</strong> @ ${o.price} ETH<div class="small mono">${o.wallet.slice(0,6)}...</div></div>`;
+    orderList.appendChild(el);
+  });
+}
+
+// --- Transaction Log ---
+const txLog=document.getElementById('txLog');
+function log(msg){
+  const el=document.createElement('div');
+  el.className='tx-item';
+  el.innerText=new Date().toLocaleTimeString()+' — '+msg;
+  txLog.prepend(el);
+}
+
+// --- Market Chart ---
+const ctx=document.getElementById('marketChart').getContext('2d');
+const marketChart=new Chart(ctx,{
+  type:'bar',
+  data:{labels:['Buy','Sell'],datasets:[{label:'CCT Orders',data:[0,0],backgroundColor:['#00f2ff','#71ffd4']}]},
+  options:{responsive:true,plugins:{legend:{display:false}}}
+});
+function updateMarketChart(){
+  const buySum=orders.filter(o=>o.type==='Buy').reduce((a,b)=>a+b.amount,0);
+  const sellSum=orders.filter(o=>o.type==='Sell').reduce((a,b)=>a+b.amount,0);
+  marketChart.data.datasets[0].data=[buySum,sellSum];
+  marketChart.update();
+}
+</script>
+
+</body>
+</html>

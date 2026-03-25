@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carbon Credit Network</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0d0d0d, #041b36, #0f3b57);
+    background-image: url("carbon.png");
+    overflow-x: hidden;
+  }
+
+  /* Floating glowing balls */
+  .glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.6;
+    animation: float 10s infinite ease-in-out alternate;
+  }
+  #g1 { width: 400px; height: 400px; background: #00eaff; top: -100px; left: -100px; }
+  #g2 { width: 300px; height: 300px; background: #00ff95; bottom: -80px; right: -50px; animation-duration: 12s; }
+  @keyframes float { 0%{transform: translateY(0);} 100%{transform: translateY(80px);} }
+
+  .container {
+    text-align: center;
+    padding-top: 120px;
+    position: relative;
+    z-index: 5;
+  }
+
+  h1 {
+    font-size: 48px;
+    font-weight: 600;
+    color: #c7e9ff;
+    text-shadow: 0 0 10px #00cfff;
+    animation: glowTitle 3s infinite alternate;
+  }
+
+  @keyframes glowTitle {
+    0% { text-shadow: 0 0 10px #00cfff; }
+    100% { text-shadow: 0 0 25px #00eaff; }
+  }
+
+  p {
+    color: #dcefff;
+    font-size: 18px;
+    margin-top: -10px;
+    opacity: 0.9;
+  }
+
+  /* Glassmorphic button panel */
+  .role-box {
+    margin: 60px auto;
+    width: 85%;
+    max-width: 900px;
+    padding: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+  }
+
+  button {
+    padding: 15px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    background: rgba(0, 255, 255, 0.15);
+    border: 1px solid #00eaff;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    backdrop-filter: blur(5px);
+  }
+
+  button:hover {
+    background: #00eaff;
+    color: #00131f;
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px #00eaff;
+  }
+
+  .footer {
+    margin-top: 60px;
+    color: #a6c7dd;
+    font-size: 14px;
+    opacity: 0.7;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- Background glowing effects -->
+<div id="g1" class="glow"></div>
+<div id="g2" class="glow"></div>
+
+<!-- Main Content -->
+<div class="container">
+  <h1>🌍 Carbon Credit Digital Network</h1>
+  <p>The future of transparent, verified, and decentralized environmental compliance.</p>
+
+  <div class="role-box">
+    <button onclick="location.href='emit.html'">Emitter Organization</button>
+    <button onclick="location.href='audit.html'">Auditor</button>
+    <button onclick="location.href='posoco.html'">POSOCO</button>
+    <button onclick="location.href='BEE.html'">BEE</button>
+    <button onclick="location.href='power.html'">Exchange</button>
+    <button onclick="location.href='report.html'">Report</button>
+  </div>
+
+  <div class="footer">© 2025 Carbon Credit Blockchain Platform • Innovating for a Greener Planet</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BEE Dashboard — Hyper Digital Control Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+:root{
+  --bg: radial-gradient(circle at 20% 20%, #04354d, #02141f 70%);
+  --glass: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.12);
+  --text: #e7faff;
+  --accent: #00f2ff;
+  --accent2: #71ffd4;
+  --radius: 16px;
+  font-family: 'Inter', sans-serif;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden; background-image: url("seron.png");}
+
+@keyframes glowPulse{
+  0%{box-shadow:0 0 0px var(--accent);} 50%{box-shadow:0 0 18px var(--accent);} 100%{box-shadow:0 0 0px var(--accent);} 
+}
+.wrap{padding:28px;max-width:1300px;margin:auto;}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px;}
+.brand{display:flex;gap:16px;align-items:center;}
+.logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#012;font-size:22px;font-weight:800;animation:glowPulse 3.8s infinite ease-in-out;}
+h1{margin:0;font-size:26px;font-weight:800;letter-spacing:0.5px;}
+.sub{font-size:14px;color:rgba(230,255,255,0.7);margin-top:4px;}
+.controls{display:flex;gap:12px;align-items:center;}
+.btn{padding:10px 16px;border-radius:12px;border:1px solid var(--border);background:var(--glass);cursor:pointer;font-weight:700;color:#eaffff;backdrop-filter:blur(10px);transition:0.2s;}
+.btn:hover{background:rgba(255,255,255,0.15);}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#00343c;border:none;animation:glowPulse 3s infinite ease-in-out;}
+main{display:grid;grid-template-columns:1fr 380px;gap:24px;margin-top:20px;}
+.card{padding:20px;border-radius:var(--radius);background:rgba(255,255,255,0.05);border:1px solid var(--border);backdrop-filter:blur(12px);box-shadow:0 0 30px rgba(0,255,255,0.05);transition:0.3s;}
+.card:hover{box-shadow:0 0 35px rgba(0,255,255,0.10);}
+label{font-size:14px;margin-bottom:6px;display:block;color:rgba(230,255,255,0.8)}
+input,select,textarea{width:100%;padding:12px;border-radius:10px;margin-top:6px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text);}
+.list{max-height:360px;overflow:auto;margin-top:14px;padding-right:6px;}
+.list-item{padding:14px;border-radius:14px;margin-bottom:10px;background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;transition:0.25s;}
+.list-item:hover{background:rgba(255,255,255,0.1);}    
+.mono{font-family:monospace;}
+.small{font-size:13px;color:rgba(220,240,255,0.7)}
+.tx-log{max-height:240px;overflow:auto;margin-top:12px;}
+.tx-item{background:rgba(0,0,0,0.35);padding:10px;border-radius:10px;margin-bottom:10px;font-size:13px;color:#c7faff;border-left:3px solid var(--accent);animation:fadeIn 0.4s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+footer{margin-top:20px;text-align:center;color:rgba(220,240,255,0.6);font-size:14px}
+.mini-charts{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-top:20px;justify-content:center;}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+
+  <header>
+    <div class="brand">
+      <div class="logo">BEE</div>
+      <div>
+        <h1>Energy Efficiency Command Center</h1>
+        <div class="sub">CAP control • ERC-20 minting • Reward governance • Benchmark intelligence</div>
+      </div>
+    </div>
+
+```
+<div class="controls">
+  <div class="small">Wallet: <span id="wallet">Not connected</span></div>
+  <button id="connectBtn" class="btn primary">Connect Wallet</button>
+  <button id="syncBtn" class="btn">Sync Chain</button>
+</div>
+```
+
+  </header>
+
+  <!-- CONTENT GRID -->
+
+  <main>
+    <section>
+      <!-- Set CAP Limits -->
+      <div class="card">
+        <h3 style="margin:0;font-size:20px;font-weight:700">Set Industry CAP Limits</h3>
+        <p class="small">Define annual emission caps for registered industries. Updates can be deployed on-chain.</p>
+        <div class="grid-2" style="margin-top:12px">
+          <div>
+            <label>Organization</label>
+            <select id="capOrg"><option>Acme Industries</option><option>BlueChem Pvt Ltd</option><option>ThermoPower Ltd</option></select>
+          </div>
+          <div>
+            <label>Annual CAP (tCO₂e)</label>
+            <input id="capValue" type="number" placeholder="e.g. 12000" />
+          </div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:12px">
+          <button id="applyCap" class="btn primary">Apply CAP</button>
+          <button id="clearCap" class="btn">Clear</button>
+        </div>
+        <div id="capList" class="list"></div>
+      </div>
+
+```
+  <!-- Mint Tokens -->
+  <div class="card" style="margin-top:20px">
+    <h3 style="margin:0;font-size:20px;font-weight:700">Mint Carbon Tokens (ERC-20)</h3>
+    <p class="small">Authorize minting of CCT tokens for certified organizations.</p>
+    <div class="grid-2" style="margin-top:12px">
+      <div><label>Recipient Wallet</label><input id="mintTo" type="text" placeholder="0x..." /></div>
+      <div><label>Amount (CCT)</label><input id="mintAmount" type="number" placeholder="e.g. 1000" /></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:12px">
+      <button id="mintBtn" class="btn primary">Mint Tokens</button>
+      <button id="simulateMint" class="btn">Simulate</button>
+    </div>
+    <div class="small" style="margin-top:10px">Contract ABI & Address: <span class="mono">Not set</span></div>
+  </div>
+
+  <!-- Benchmarks -->
+  <div class="card" style="margin-top:20px">
+    <h3 style="margin:0;font-size:20px;font-weight:700">Manage Benchmarks & Targets</h3>
+    <p class="small">Set industry emission baseline values for reward calculation.</p>
+    <div style="margin-top:12px">
+      <label>Sector</label>
+      <select id="benchSector"><option>Steel</option><option>Cement</option><option>Power</option></select>
+      <label style="margin-top:10px">Target (tCO₂e / year)</label>
+      <input id="benchTarget" type="number" placeholder="e.g. 10000" />
+      <div style="margin-top:14px;display:flex;gap:12px">
+        <button id="saveBench" class="btn primary">Save Benchmark</button>
+        <button id="resetBench" class="btn">Reset</button>
+      </div>
+      <div id="benchList" class="small" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- Mini Donut Charts -->
+  <div class="mini-charts">
+    <div style="text-align:center;">
+      <canvas id="capChart" width="100" height="100"></canvas>
+      <div style="color:#00f2ff;font-weight:700;margin-top:4px;font-size:13px;">CAP Usage</div>
+    </div>
+    <div style="text-align:center;">
+      <canvas id="tokenChart" width="100" height="100"></canvas>
+      <div style="color:#71ffd4;font-weight:700;margin-top:4px;font-size:13px;">Tokens Minted</div>
+    </div>
+    <div style="text-align:center;">
+      <canvas id="rewardChart" width="100" height="100"></canvas>
+      <div style="color:#ff85c0;font-weight:700;margin-top:4px;font-size:13px;">Rewards Approved</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- RIGHT SIDE -->
+<aside>
+  <!-- Rewards -->
+  <div class="card">
+    <h3 style="margin:0;font-size:20px;font-weight:700">Pending Emission Rewards</h3>
+    <p class="small">Approve reward tokens for validated emission reductions.</p>
+    <div id="rewardsList" class="list"></div>
+  </div>
+
+  <!-- TX Log -->
+  <div class="card" style="margin-top:20px">
+    <h3 style="margin:0;font-size:20px;font-weight:700">Transaction Log</h3>
+    <div id="txLog" class="tx-log"></div>
+  </div>
+</aside>
+```
+
+  </main>
+
+  <footer>© 2025 BEE — Carbon Token Command Center</footer>
+</div>
+
+<script>
+lucide.createIcons();
+
+/* --- Data Stores ---*/
+const caps=[]; const benchmarks=[];
+const pendingRewards=[
+  {id:'RWD-001', org:'Acme Industries', reduction:120, suggestedCCT:1200},
+  {id:'RWD-002', org:'BlueChem Pvt Ltd', reduction:80, suggestedCCT:800}
+];
+
+/* --- TX Log ---*/
+const txLog=document.getElementById('txLog');
+function log(msg){
+  const el=document.createElement('div'); el.className='tx-item'; el.innerText=new Date().toLocaleTimeString()+' — '+msg; txLog.prepend(el);
+}
+
+/* --- CAP FUNCTIONS ---*/
+const capList=document.getElementById('capList');
+document.getElementById('applyCap').addEventListener('click',()=>{
+  const org=document.getElementById('capOrg').value;
+  const cap=document.getElementById('capValue').value;
+  if(!cap){alert('Enter a CAP value');return;}
+  caps.push({org,cap}); renderCaps(); log(`CAP applied: ${org} — ${cap} tCO2e`);
+});
+function renderCaps(){
+  capList.innerHTML='';
+  caps.forEach(c=>{
+    const row=document.createElement('div'); row.className='list-item';
+    row.innerHTML=`<div><strong>${c.org}</strong><div class='small mono'>CAP: ${c.cap} tCO2e</div></div>
+                   <button class='btn' onclick="removeCap('${c.org}')">Remove</button>`;
+    capList.appendChild(row);
+  });
+}
+function removeCap(org){const i=caps.findIndex(x=>x.org===org); if(i>-1){caps.splice(i,1); renderCaps(); log(`Removed CAP for ${org}`);} }
+
+/* --- BENCHMARKS ---*/
+const benchList=document.getElementById('benchList');
+document.getElementById('saveBench').addEventListener('click',()=>{
+  const sector=document.getElementById('benchSector').value;
+  const target=document.getElementById('benchTarget').value;
+  if(!target){alert('Enter target');return;}
+  benchmarks.push({sector,target});
+  benchList.innerHTML = benchmarks.map(b=>`${b.sector}: ${b.target} tCO2e`).join('<br>');
+  log(`Benchmark set — ${sector}: ${target}`);
+});
+
+/* --- REWARDS ---*/
+const rewardsList=document.getElementById('rewardsList');
+function renderRewards(){
+  rewardsList.innerHTML='';
+  pendingRewards.forEach(r=>{
+    const el=document.createElement('div'); el.className='list-item';
+    el.innerHTML=
+    `<div><strong>${r.org}</strong><div class='small'>Reduction: ${r.reduction} tCO2e • Reward: ${r.suggestedCCT} CCT</div></div>
+     <div style='display:flex;flex-direction:column;gap:8px'>
+      <button class='btn primary' onclick="approveReward('${r.id}')">Approve</button>
+      <button class='btn' onclick="denyReward('${r.id}')">Deny</button>
+     </div>`;
+    rewardsList.appendChild(el);
+  });
+}
+function approveReward(id){const i=pendingRewards.findIndex(x=>x.id===id); if(i>-1){const r=pendingRewards[i]; pendingRewards.splice(i,1); renderRewards(); log(`Reward approved for ${r.org}`);} }
+function denyReward(id){const i=pendingRewards.findIndex(x=>x.id===id); if(i>-1){const r=pendingRewards[i]; pendingRewards.splice(i,1); renderRewards(); log(`Reward denied for ${r.org}`);} }
+
+/* --- WALLET + MINT ---*/
+let web3;
+document.getElementById('connectBtn').addEventListener('click',async()=>{
+  if(window.ethereum){await window.ethereum.request({method:'eth_requestAccounts'});
+    web3=new Web3(window.ethereum);
+    const acct=(await web3.eth.getAccounts())[0]; document.getElementById('wallet').innerText=acct;
+    log('Wallet connected: '+acct);
+  } else alert('MetaMask not found');
+});
+
+document.getElementById('mintBtn').addEventListener('click',()=>{
+  const to=document.getElementById('mintTo').value;
+  const amt=document.getElementById('mintAmount').value;
+  if(!to||!amt){alert('Enter wallet + amount');return;}
+  const fakeTx='0x'+Math.random().toString(16).slice(2,12);
+  log(`Minted ${amt} CCT → ${to} (mock tx: ${fakeTx})`);
+});
+document.getElementById('simulateMint').addEventListener('click',()=>{
+  document.getElementById('mintTo').value='0x'+Math.random().toString(16).slice(2,12);
+  document.getElementById('mintAmount').value=Math.floor(Math.random()*1500)+300;
+});
+document.getElementById('syncBtn').addEventListener('click',()=>log('Chain sync complete'));
+
+/* --- MINI DONUT CHARTS ---*/
+function createMiniDonut(ctx,dataValues,gradientColors,labelText){
+  const chart=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels:['Used','Remaining'],datasets:[{data:dataValues,backgroundColor:gradientColors,borderColor:'#001f2f',borderWidth:2,hoverOffset:8}]},
+    options:{
+      responsive:false,cutout:'65%',
+      plugins:{legend:{display:false},tooltip:{enabled:true}},
+      animation:{animateRotate:true,animateScale:true}
+    }
+  });
+  let rotation=0;
+  function rotateChart(){rotation+=0.008;chart.options.rotation=rotation;chart.update('none');requestAnimationFrame(rotateChart);}
+  rotateChart();
+}
+createMiniDonut(document.getElementById('capChart').getContext('2d'),[73000,27000],['rgba(0,242,255,0.85)','rgba(113,255,212,0.2)'],'73%');
+createMiniDonut(document.getElementById('tokenChart').getContext('2d'),[46000,14000],['rgba(113,255,212,0.85)','rgba(0,242,255,0.15)'],'77%');
+createMiniDonut(document.getElementById('rewardChart').getContext('2d'),[3200,1800],['rgba(255,133,192,0.85)','rgba(255,133,192,0.2)'],'64%');
+
+renderCaps(); renderRewards();
+</script>
+
+</body>
+</html>
